@@ -2,7 +2,7 @@ import Camping.Animateur;
 import java.util.Scanner;
 
 public  Scanner sc =new Scanner(System.in);
-private List<Animateur> animateursMain=new ArrayList<>();
+public List<Animateur> animateursMain=new ArrayList<>();
 void main() {
     System.out.println("\n1: Gestion Animateur | 2: Gestion Animation | 3: Planification");
     System.out.print("Saisissez un chiffre:");
@@ -65,16 +65,19 @@ public void delAnimateur(){
     System.out.println("\nEst ce Id: "+Id+"\nNom: "+Nom+"?\n1: OUI | 2: NON");
     int index=sc.nextInt();
 
+    if(Id>=animateursMain.size()){
+        System.out.println("Erreur de saisit.");
+        delAnimateur();
+    }
     if(index==1){
         animateursMain.remove(animateursMain.get(Id));
     }else System.out.println("Retour au menu.");
     gestionAnimateur();
 }
-
 public void manageAnimateur(){
     System.out.println("\nGerer les Animateurs:");
     for (Animateur animateur:animateursMain){
-        System.out.println(animateur.afficheInfo());
+        System.out.println("Id: "+animateursMain.indexOf(animateur)+animateur.afficheInfo());
     }
     gestionAnimateur();
 }

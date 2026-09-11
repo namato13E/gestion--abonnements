@@ -31,7 +31,7 @@ public class Animateur {
         this.coordonees = coordonees;
     }
     public String  afficheInfo(){
-        return("Id: "+this.getId()+" Nom: "+this.getNom());
+        return(" Nom: "+this.getNom());
     }
 
 
