@@ -30,6 +30,9 @@ public class Animateur {
     public void setCoordonees(String[] coordonees) {
         this.coordonees = coordonees;
     }
+    public String  afficheInfo(){
+        return("Id: "+this.getId()+" Nom: "+this.getNom());
+    }
 
 
 }
