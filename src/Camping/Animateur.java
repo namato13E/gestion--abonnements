@@ -3,39 +3,26 @@ package Camping;
 public class Animateur {
     private int id;
     private String nom;
+    private String prenom;
     private String[] coordonees;
 
     public Animateur(){}
 
-    public Animateur( int id, String nom){
-        this.id=id;
-        this.nom=nom;
-    }
 
-    public Animateur( int id, String nom, String[] coordonees){
+    public Animateur( int id, String nom, String prenom, String[] coordonees){
         this.id=id;
         this.nom=nom;
+        this.prenom=prenom;
         this.coordonees=coordonees;
     }
 
     public int getId() {
         return id;
     }
-    public void setId(int id) {
-        this.id = id;
-    }
     public String getNom() {
         return nom;
-    }
-    public void setNom(String nom) {
-        this.nom = nom;
     }
     public String[] getCoordonees() {
         return coordonees;
     }
-    public void setCoordonees(String[] coordonees) {
-        this.coordonees = coordonees;
-    }
-
-
 }

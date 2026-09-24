@@ -12,7 +12,9 @@ animations proposées aux vacanciers.
 ###Une activité pourra être encadrée par plusieurs animateurs.
 
 ###Chacun des animateurs ne pourra animer qu’une activité à la fois et il faudra veiller à ce que chaque animateur ne dépasse pas la durée maximale de 7 animations par jour.
-
+-> Faire une requete sql qu retournera le nbr de fois ou l anim apparait entre Date_Debut et Date_fin et ajouter un COUNT
+SELECT COUNT(IdAnim) FROM `animateur` WHERE animateur.Nom == "NOM" AND animateur.Prenom == "PRENOM"
+Et pour una activité a la fois on ferra un tcheque des horraires savoir si il est dispo
 
 
 L’application sera protégée par un identifiant / mot de passe dans les règles de l’art et les
