@@ -6,7 +6,7 @@ void main() {
 
     //Tentative de plaling: trier les dates par ordre croissant
     ArrayList<Animation> listAnimation = new ArrayList<>();
-    listAnimation.add(new Animation("testAnimation",1,010101,10,2,new Animateur(1,"Paul")));
+    listAnimation.add(new Animation("testAnimation",1,010101,10,2,new ArrayList<Animateur>()));
     Planing planing1= new Planing();
     for(Animation anim:listAnimation){
         System.out.println(anim.infosAnimation());

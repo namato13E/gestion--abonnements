@@ -8,12 +8,12 @@ public class Animation extends Animateur{
     private int date;
     private int heure;
     private int duree;
-    private Animateur animateur;
+    private ArrayList<Animateur> animateur;
 
 
     public Animation(){}
 
-    public Animation(String nom, int id, int date, int heure, int duree, Animateur animateur){
+    public Animation(String nom, int id, int date, int heure, int duree, ArrayList<Animateur> animateur){
         this.nom=nom;
         this.id=id;
         this.date=date;
@@ -21,6 +21,7 @@ public class Animation extends Animateur{
         this.duree=duree;
         this.animateur=animateur;
     }
+
 
     public String infosAnimation(){
         return "Id: "+id+", nom: "+nom+", date: "+date+", heure: "+heure+", duree: "+duree+", animateur: "+animateur;
