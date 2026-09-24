@@ -12,13 +12,21 @@ public void addAnimateur(){
     System.out.print("Mail: ");
     coordonee[0]=sc.next();
     System.out.print("Code Postale: ");
-    coordonee[3]=sc.next();
+    String a = "";
+    while(a.length()<5 || a.length()>5){
+        a=sc.next();
+    }
+    coordonee[3]=a;
     System.out.print("Ville: ");
     coordonee[2]=sc.next();
     System.out.print("Adresse: ");
     coordonee[1]=sc.next();
     System.out.print("Telephone: ");
-    coordonee[4]=sc.next();
+    String b = "";
+    while(b.length()<10 || b.length()>10){
+        b=sc.next();
+    }
+    coordonee[4]=b;
     System.out.print("Id: ");
     int id=sc.nextInt();
     System.out.print("Nom: ");
