@@ -41,29 +41,4 @@ public class Animateur {
         return "Nom: "+this.nom+", Prenom: "+this.prenom;
     }
 
-    public void pdo(){
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-
-            Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
-            Statement stmt = connexion.createStatement();
-            String requete = "SELECT * FROM animateur";
-            ResultSet res = stmt.executeQuery(requete);
-
-            while (res.next()) {
-                int id = res.getInt("IdAnim");
-                String nom = res.getString("Nom");
-                String prenom = res.getString("Prenom");
-
-                System.out.println("ID : " + id + ", Nom : " + nom + ", Prénom : " + prenom);
-            }
-
-            res.close();
-            stmt.close();
-            connexion.close();
-        } catch (SQLException | ClassNotFoundException exc) {
-            System.out.println("ERREUR");
-            exc.printStackTrace();
-        }
-    }
 }
