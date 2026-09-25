@@ -5,26 +5,42 @@ import java.util.ArrayList;
 public class Animation extends Animateur{
     private String nom;
     private int id;
-    private int date;
-    private int heure;
-    private int duree;
+    private int heureDebut;
+    private int heureFin;
+    private int idAnim;
+    private int idTypeAnim;
     private ArrayList<Animateur> animateur;
 
 
     public Animation(){}
 
-    public Animation(String nom, int id, int date, int heure, int duree, ArrayList<Animateur> animateur){
+    public Animation(int id, String nom, int heureDebut, int heureFin, int idAnim, int idTypeAnim){
         this.nom=nom;
         this.id=id;
-        this.date=date;
-        this.heure=heure;
-        this.duree=duree;
-        this.animateur=animateur;
+        this.heureDebut=heureDebut;
+        this.heureFin=heureFin;
+        this.idAnim=idAnim;
+        this.idTypeAnim=idTypeAnim;
     }
 
+    public int getHeureDebut() {
+        return heureDebut;
+    }
+
+    public int getHeureFin() {
+        return heureFin;
+    }
+
+    public int getIdAnim() {
+        return idAnim;
+    }
+
+    public int getIdTypeAnim() {
+        return idTypeAnim;
+    }
 
     public String infosAnimation(){
-        return "Id: "+id+", nom: "+nom+", date: "+date+", heure: "+heure+", duree: "+duree+", animateur: "+animateur;
+        return "Id: "+id+", nom: "+nom+", dateDebut: "+heureDebut+", dateFin: "+heureFin+", idAnim: "+idAnim+", idTypeAnim: "+idTypeAnim;
     }
 }
 

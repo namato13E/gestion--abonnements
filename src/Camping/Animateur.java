@@ -25,4 +25,8 @@ public class Animateur {
     public String[] getCoordonees() {
         return coordonees;
     }
+
+    public String getPrenom() {
+        return prenom;
+    }
 }
