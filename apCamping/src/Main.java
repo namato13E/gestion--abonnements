@@ -3,32 +3,20 @@ import Camping.Animateur;
 import java.sql.*;
 import java.util.Scanner;
 
+
 public  Scanner sc =new Scanner(System.in);
-private List<Animateur> animateursMain=new ArrayList<>();
+private final List<Animateur> animateursMain=new ArrayList<>();
 
 public String URL = "jdbc:mysql://172.17.0.7:3306/apCamping";
 public String LOGIN = "Himation";
 public String PASSWORD = "Camping@Anee_2027";
-public boolean bddError=true;
-
 void main() {
-    if(bddError){
-        System.out.println("Connexion: ");
-        try {
-            Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
-            System.out.println("Connexion réussie");
-            bddError=false;
-        }
-        catch (SQLException exc) {
-            System.out.print("erreur: ");
-            System.out.println(exc.getMessage());
-        }
-    }
     System.out.println("\n1: Gestion Animateur | 2: Gestion Animation | 3: Planification");
     System.out.print("Saisissez un chiffre:");
     int index=sc.nextInt();
     switch (index){
         case 1:gestionAnimateur();
+        case 3:gestionPlaning();
         default:
             main();
     }
@@ -39,7 +27,7 @@ public void gestionAnimateur(){
     int index = sc.nextInt();
     switch (index){
         case 1: InterfaceAddAnimateur(); break;
-        case 2: getAnimateurListe(); break;
+        case 2: getAnimateurListe(true); break;
         case 3: InterfaceDelAnimateur(); break;
         case 4: main(); break;
         default:
@@ -47,7 +35,10 @@ public void gestionAnimateur(){
             gestionAnimateur();
     }
 }
+public void gestionPlaning(){}
 
+
+//=========| Gestion Affichage Animateur |=========\\
 public void InterfaceAddAnimateur(){
     System.out.print("\nAjout d'Animateur:\nNom: ");
     String nom = sc.next();
@@ -68,29 +59,53 @@ public void InterfaceAddAnimateur(){
     Animateur newA = new Animateur(animateursMain.size(), nom, prenom, coordonee);
     createAnimateur(newA);
     animateursMain.add(newA);
-    afficherAnimateur(newA);
+    System.out.println("\nAnimateur Créer");
     gestionAnimateur();
 }
 public void InterfaceDelAnimateur(){
+    getAnimateurListe(false);
     System.out.print("\nSupression d'Animateur:\nId: ");
     int id = sc.nextInt();
-    System.out.print("Nom: ");
-    String nom = sc.next();
 
-    System.out.println("\nEst ce Id: "+id+"\nNom: "+nom+"?\nOUI: 1 | NON: 2");
-    int choix = sc.nextInt();
+    boolean trouve = false;
+    int indexATrouver = -1;
 
-    if(choix == 1){
-        suprAnimateur(id);
-        animateursMain.removeIf(a -> a.getId() == id);
-        System.out.println("Animateur supprimé avec succès.");
-    } else {
-        System.out.println("Retour au menu.");
+    for(Animateur animateur:animateursMain){
+        if (animateur.getId()==id){
+            indexATrouver=animateursMain.indexOf(animateur);
+            trouve=!trouve;
+        }
     }
-    gestionAnimateur();
+
+    if(trouve){
+        String nom = animateursMain.get(indexATrouver).getNom();
+        System.out.println("\nEst ce Id: "+id+"\nNom: "+nom+"?\nOUI: 1 | NON: 2");
+        int choix = sc.nextInt();
+
+        if(choix == 1){
+            suprAnimateur(id);
+            animateursMain.removeIf(a -> a.getId() == id);
+            System.out.println("Animateur supprimé avec succès.");
+        } else {
+            System.out.println("Retour au menu.");
+        }
+        gestionAnimateur();
+    }
+    else {
+        System.out.println("Erreur lors de la saisie de l'animateur.");
+        gestionAnimateur();
+    }
+}
+public void afficherAnimateur(Animateur animateur){
+    String[] co = animateur.getCoordonees();
+    System.out.print("\nId: " + animateur.getId() +"\n"+ animateur.afficheInfo() + "\nCoordonée: " + co[0]);
+    for (int i = 1; i < co.length; i++) {
+        System.out.print(", " + co[i]);
+    }
+    System.out.println();
 }
 
-public void getAnimateurListe(){
+public void getAnimateurListe(boolean afficher){
     try {
         animateursMain.clear();
         Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
@@ -98,7 +113,7 @@ public void getAnimateurListe(){
         String requete = "SELECT * FROM animateur";
         ResultSet res = stmt.executeQuery(requete);
 
-        System.out.println("\n-------| Liste d'animateurs |-------");
+        if(afficher) System.out.println("\n-------| Liste d'animateurs |-------");
         while (res.next()) {
             Animateur animateur = new Animateur(
                     res.getInt("IdAnim"),
@@ -113,20 +128,19 @@ public void getAnimateurListe(){
                     }
             );
             animateursMain.add(animateur);
-            afficherAnimateur(animateur);
+            if(afficher) afficherAnimateur(animateur);
         }
 
         res.close();
         stmt.close();
         connexion.close();
-        gestionAnimateur();
+        if(afficher) gestionAnimateur();
     } catch (SQLException exc) {
         System.out.println("ERREUR");
         exc.printStackTrace();
         gestionAnimateur();
     }
 }
-
 public void createAnimateur(Animateur animateur){
     try {
         Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
@@ -162,13 +176,4 @@ public void suprAnimateur(int idAnimateur){
         System.out.println("ERREUR");
         exc.printStackTrace();
     }
-}
-
-public void afficherAnimateur(Animateur animateur){
-    String[] co = animateur.getCoordonees();
-    System.out.print("\nId: " + animateur.getId() + "\nNom: " + animateur.getNom() + "\nPrenom: " + animateur.getPrenom() + "\nCoordonée: " + co[0]);
-    for (int i = 1; i < co.length; i++) {
-        System.out.print(", " + co[i]);
-    }
-    System.out.println();
 }
