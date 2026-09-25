@@ -1,11 +1,11 @@
-import Camping.Animateur;
-
+import Camping.*;
 import java.sql.*;
-import java.util.Scanner;
+import java.util.*;
 
 
 public  Scanner sc =new Scanner(System.in);
 private final List<Animateur> animateursMain=new ArrayList<>();
+private List<Animation> animationMain=new ArrayList<>();
 
 public String URL = "jdbc:mysql://172.17.0.7:3306/apCamping";
 public String LOGIN = "Himation";
@@ -16,6 +16,7 @@ void main() {
     int index=sc.nextInt();
     switch (index){
         case 1:gestionAnimateur();
+        case 2:gestionAnimation();
         case 3:gestionPlaning();
         default:
             main();
@@ -29,6 +30,19 @@ public void gestionAnimateur(){
         case 1: InterfaceAddAnimateur(); break;
         case 2: getAnimateurListe(true); break;
         case 3: InterfaceDelAnimateur(); break;
+        case 4: main(); break;
+        default:
+            System.out.println("Saisissez un chiffre correct");
+            gestionAnimateur();
+    }
+}
+public void gestionAnimation(){
+    System.out.println("\n1: Ajouter une Animation | 2: Liste d'animations | 3: Suprimer une Animation | 4: Retour");
+    int index = sc.nextInt();
+    switch (index){
+        case 1: InterfaceAddAnimation(); break;
+        case 2: getAnimationListe(); break;
+        case 3: InterfaceDelAnimation(); break;
         case 4: main(); break;
         default:
             System.out.println("Saisissez un chiffre correct");
@@ -163,6 +177,112 @@ public void createAnimateur(Animateur animateur){
     }
 }
 public void suprAnimateur(int idAnimateur){
+    try {
+        Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
+        String requete = "DELETE FROM `apCamping`.`animateur` WHERE  `IdAnim`=?;";
+        PreparedStatement pstmt = connexion.prepareStatement(requete);
+        pstmt.setInt(1, idAnimateur);
+        pstmt.executeUpdate();
+
+        pstmt.close();
+        connexion.close();
+    } catch (SQLException exc) {
+        System.out.println("ERREUR");
+        exc.printStackTrace();
+    }
+}
+
+
+//=========| Gestion Affichage Animation |=========\\
+public void InterfaceAddAnimation(){
+    System.out.print("\nAjout d'Animation:\nNom: ");
+    String nom = sc.next();
+    System.out.print("Heure de debut: ");
+    int heureFin = sc.nextInt();
+    System.out.print("Heure de fin: ");
+    int heureDebut = sc.nextInt();
+    System.out.print("Id anim: ");
+    int idAnim = sc.nextInt();
+    System.out.print("Id type anim: ");
+    int idTypeAnim = sc.nextInt();
+
+
+    Animation newA = new Animation(animationMain.size(), nom,  heureDebut, heureFin,idAnim,idTypeAnim);
+    createAnimation(newA);
+    animationMain.add(newA);
+    newA.infosAnimation();
+    gestionAnimation();
+}
+public void InterfaceDelAnimation(){
+    System.out.print("\nSupression d'Animation:\nId: ");
+    int id = sc.nextInt();
+
+    System.out.println("\nEst ce Id: "+id+"?\nOUI: 1 | NON: 2");
+    int choix = sc.nextInt();
+
+    if(choix == 1){
+        suprAnimation(id);
+        animationMain.removeIf(a -> a.getId() == id);
+        System.out.println("Animation supprimé avec succès.");
+    } else {
+        System.out.println("Retour au menu.");
+    }
+    gestionAnimateur();
+}
+
+public void getAnimationListe(){
+    try {
+        animationMain.clear();
+        Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
+        Statement stmt = connexion.createStatement();
+        String requete = "SELECT * FROM animation";
+        ResultSet res = stmt.executeQuery(requete);
+
+        System.out.println("\n-------| Liste d'animations |-------");
+        while (res.next()) {
+            Animation animation = new Animation(
+                    res.getInt("IdAnimation"),
+                    res.getString("NomAnim"),
+                    res.getInt("HeureDebutAnim"),
+                    res.getInt("HeureFinAnim"),
+                    res.getInt("IdAnim"),
+                    res.getInt("idTypeAnim")
+            );
+            animationMain.add(animation);
+            afficherAnimateur(animation);
+        }
+
+        res.close();
+        stmt.close();
+        connexion.close();
+        gestionAnimateur();
+    } catch (SQLException exc) {
+        System.out.println("ERREUR");
+        exc.printStackTrace();
+        gestionAnimateur();
+    }
+}
+
+public void createAnimation(Animation animation){
+    try {
+        Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
+        String requete = "INSERT INTO animateur (NomAnim, HeureDebutAnim, HeureFinAnim, IdAnim, IdTypeAnim) VALUES (?, ?, ?, ?, ?)";
+        PreparedStatement pstmt = connexion.prepareStatement(requete);
+        pstmt.setString(1, animation.getNom());
+        pstmt.setInt(2, animation.getHeureDebut());
+        pstmt.setInt(3, animation.getHeureFin());
+        pstmt.setInt(4, animation.getIdAnim());
+        pstmt.setInt(5, animation.getIdTypeAnim());
+        pstmt.executeUpdate();
+
+        pstmt.close();
+        connexion.close();
+    } catch (SQLException exc) {
+        System.out.println("ERREUR");
+        exc.printStackTrace();
+    }
+}
+public void suprAnimation(int idAnimateur){
     try {
         Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
         String requete = "DELETE FROM `apCamping`.`animateur` WHERE  `IdAnim`=?;";
