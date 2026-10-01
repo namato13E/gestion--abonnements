@@ -25,7 +25,7 @@ void main() {
 }
 
 public void gestionAnimateur(){
-    System.out.println("\n1: Ajouter un Animateur | 2: Liste d'animateurs | 3: Suprimer un Animateur | 4: Retour");
+    System.out.println("\n1: Ajouter un Animateur | 2: Liste d'animateurs | 3: Supprimer un Animateur | 4: Retour");
     int index = sc.nextInt();
     switch (index){
         case 1: InterfaceAddAnimateur(); break;
@@ -38,7 +38,7 @@ public void gestionAnimateur(){
     }
 }
 public void gestionAnimation(){
-    System.out.println("\n1: Ajouter une Animation | 2: Liste d'animations | 3: Suprimer une Animation | 4: Retour");
+    System.out.println("\n1: Ajouter une Animation | 2: Liste d'animations | 3: Supprimer une Animation | 4: Retour");
     int index = sc.nextInt();
     switch (index){
         case 1: InterfaceAddAnimation(); break;
@@ -55,31 +55,31 @@ public void gestionPlaning(){}
 
 //=========| Gestion Affichage Animateur |=========\\
 public void InterfaceAddAnimateur(){
-    System.out.print("\nAjout d'Animateur:\nNom: ");
+    System.out.print("\nAjout d'Animateur :\nNom : ");
     String nom = sc.next();
-    System.out.print("Prénom: ");
+    System.out.print("Prénom : ");
     String prenom = sc.next();
     String[] coordonee = new String[5];
-    System.out.print("Mail: ");
+    System.out.print("Mail : ");
     coordonee[0] = sc.next();
-    System.out.print("Telephone: ");
+    System.out.print("Téléphone : ");
     coordonee[4] = sc.next();
-    System.out.print("Code Postale: ");
+    System.out.print("Code Postale : ");
     coordonee[3] = sc.next();
-    System.out.print("Ville: ");
+    System.out.print("Ville : ");
     coordonee[2] = sc.next();
-    System.out.print("Adresse: ");
+    System.out.print("Adresse : ");
     coordonee[1] = sc.next();
 
     Animateur newA = new Animateur(animateursMain.size(), nom, prenom, coordonee);
     createAnimateur(newA);
     animateursMain.add(newA);
-    System.out.println("\nAnimateur Créer");
+    System.out.println("\nCréation de l'animateur réalisé avec succès");
     gestionAnimateur();
 }
 public void InterfaceDelAnimateur(){
     getAnimateurListe(false);
-    System.out.print("\nSupression d'Animateur:\nId: ");
+    System.out.print("\nSuppression d'Animateur:\nId: ");
     int id = sc.nextInt();
 
     boolean trouve = false;
@@ -93,8 +93,8 @@ public void InterfaceDelAnimateur(){
     }
 
     if(trouve){
-        String nom = animateursMain.get(indexATrouver).getNom();
-        System.out.println("\nEst ce Id: "+id+"\nNom: "+nom+"?\nOUI: 1 | NON: 2");
+        String nom = animateursMain.get(indexATrouver).afficheInfo();
+        System.out.println("\nCes informations sont elles corrects ?\nId: "+id+"\n"+nom+"?\nOUI: 1 | NON: 2");
         int choix = sc.nextInt();
 
         if(choix == 1){
@@ -113,7 +113,7 @@ public void InterfaceDelAnimateur(){
 }
 public void afficherAnimateur(Animateur animateur){
     String[] co = animateur.getCoordonees();
-    System.out.print("\nId: " + animateur.getId() +"\n"+ animateur.afficheInfo() + "\nCoordonée: " + co[0]);
+    System.out.print("\nId: " + animateur.getId() +"\n"+ animateur.afficheInfo() + "\nCoordonées : " + co[0]);
     for (int i = 1; i < co.length; i++) {
         System.out.print(", " + co[i]);
     }
@@ -220,7 +220,7 @@ public void InterfaceAddAnimation(){
 }
 public void InterfaceDelAnimation(){
     getAnimationListe(false);
-    System.out.print("\nSupression d'Animation:\nId: ");
+    System.out.print("\nSuppression d'Animation:\nId: ");
     int id = sc.nextInt();
 
     boolean trouve = false;
@@ -235,13 +235,13 @@ public void InterfaceDelAnimation(){
 
     if(trouve){
         String nom = animationMain.get(indexATrouver).getNom();
-        System.out.println("\nEst ce Id: "+id+"\nNom: "+nom+"?\nOUI: 1 | NON: 2");
+        System.out.println("\nCes informations sont elles corrects ?\nID : "+id+"\nNom : "+nom+"?\nOUI: 1 | NON: 2");
         int choix = sc.nextInt();
 
         if(choix == 1){
             suprAnimation(id);
             animationMain.removeIf(a -> a.getId() == id);
-            System.out.println("Animation supprimé avec succès.");
+            System.out.println("Animation supprimée avec succès.");
         } else {
             System.out.println("Retour au menu.");
         }
@@ -258,7 +258,7 @@ public void afficherAnimation(Animation animation){
 }
 public void afficherTypeAnimation(){
     for(Map.Entry<Integer, String > entry: typeAnimation.entrySet())
-    System.out.print("\n"+ entry.getKey()+": "+entry.getValue());
+        System.out.print("\n"+ entry.getKey()+": "+entry.getValue());
 }
 
 public void getTypeAnimation(){
