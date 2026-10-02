@@ -1,38 +1,41 @@
 package Camping;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class Animation extends Animateur{
+public class Animation{
     private String nom;
     private int id;
-    private int heureDebut;
-    private int heureFin;
-    private int idAnim;
+    private String heureDebut;
+    private String  heureFin;
     private int idTypeAnim;
-    private ArrayList<Animateur> animateur;
+
 
 
     public Animation(){}
 
-    public Animation(int id, String nom, int heureDebut, int heureFin, int idAnim, int idTypeAnim){
+    public Animation(int id, String nom, String  heureDebut, String  heureFin, int idTypeAnim){
         this.nom=nom;
         this.id=id;
         this.heureDebut=heureDebut;
         this.heureFin=heureFin;
-        this.idAnim=idAnim;
         this.idTypeAnim=idTypeAnim;
     }
 
-    public int getHeureDebut() {
+    public int getId() {
+        return id;
+    }
+
+    public String getNom() {
+        return nom;
+    }
+
+    public String  getHeureDebut() {
         return heureDebut;
     }
 
-    public int getHeureFin() {
+    public String  getHeureFin() {
         return heureFin;
-    }
-
-    public int getIdAnim() {
-        return idAnim;
     }
 
     public int getIdTypeAnim() {
@@ -40,9 +43,6 @@ public class Animation extends Animateur{
     }
 
     public String infosAnimation(){
-        return "Id: "+id+", nom: "+nom+", dateDebut: "+heureDebut+", dateFin: "+heureFin+", idAnim: "+idAnim+", idTypeAnim: "+idTypeAnim;
+        return "Id: "+id+", nom: "+nom+", dateDebut: "+heureDebut+", dateFin: "+heureFin+", idTypeAnim: "+idTypeAnim;
     }
 }
-
-
-
