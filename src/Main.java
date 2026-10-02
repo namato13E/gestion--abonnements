@@ -53,7 +53,27 @@ public void gestionAnimation(){
             gestionAnimateur();
     }
 }
-public void gestionPlaning(){}
+public void gestionPlaning(){
+    try {
+        Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
+        Statement stmt = connexion.createStatement();
+        String requete = "SELECT * FROM Animation WHERE heureDebutAnim >= CURRENT_DATE AND heureDebutAnim < CURRENT_DATE + INTERVAL '7 days' ORDER BY date_rdv ASC;";
+        ResultSet res = stmt.executeQuery(requete);
+        while (res.next()) {
+            // Dans votre boucle while (resultSet.next())
+            LocalDateTime debut = res.getObject("heureDebutAnim", LocalDateTime.class);
+            LocalDateTime fin = res.getObject("heureFinAnim", LocalDateTime.class);
+
+            System.out.println("Debut: "+debut+" fin: "+fin);
+
+        }
+    } catch (SQLException e) {
+        throw new RuntimeException(e);
+    }
+
+
+
+}
 
 
 //=========| Gestion Affichage Animateur |=========\\
@@ -373,4 +393,4 @@ public void exporterEnPDF(String cheminDossier){
     } catch (Exception e) {
         e.printStackTrace();
     }
-};
+}
