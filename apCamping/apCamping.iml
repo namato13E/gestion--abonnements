@@ -17,5 +17,7 @@
       </library>
     </orderEntry>
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="github.librepdf.openpdf" level="project" />
+    <orderEntry type="library" name="mindrot.jbcrypt" level="application" />
   </component>
 </module>
