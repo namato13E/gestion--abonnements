@@ -1,16 +1,22 @@
 import Camping.*;
+
 import java.sql.*;
 import java.util.*;
+import com.lowagie.text.Document;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.pdf.PdfWriter;
 
 
 public  Scanner sc =new Scanner(System.in);
 private final List<Animateur> animateursMain=new ArrayList<>();
 private List<Animation> animationMain=new ArrayList<>();
 private HashMap<Integer, String> typeAnimation=new HashMap<>();
+private HashMap<Animation, Animateur[]> planning=new HashMap<>();
 
 public String URL = "jdbc:mysql://172.17.0.18:3306/apCamping";
 public String LOGIN = "Himation";
 public String PASSWORD = "Camping@Anee_2027";
+
 void main() {
     System.out.println("\n1: Gestion Animateur | 2: Gestion Animation | 3: Planification");
     System.out.print("Saisissez un chiffre:");
@@ -24,12 +30,17 @@ void main() {
     }
 }
 
+public void login(){
+    System.out.println("Bienvenus ");
+}
+
 public void gestionAnimateur(){
     System.out.println("\n1: Ajouter un Animateur | 2: Liste d'animateurs | 3: Supprimer un Animateur | 4: Retour");
+    System.out.print("Saisissez un chiffre:");
     int index = sc.nextInt();
     switch (index){
         case 1: InterfaceAddAnimateur(); break;
-        case 2: getAnimateurListe(true); break;
+        case 2: getAnimateurListe(true, "gestionAnimateur"); break;
         case 3: InterfaceDelAnimateur(); break;
         case 4: main(); break;
         default:
@@ -39,6 +50,7 @@ public void gestionAnimateur(){
 }
 public void gestionAnimation(){
     System.out.println("\n1: Ajouter une Animation | 2: Liste d'animations | 3: Supprimer une Animation | 4: Retour");
+    System.out.print("Saisissez un chiffre:");
     int index = sc.nextInt();
     switch (index){
         case 1: InterfaceAddAnimation(); break;
@@ -50,10 +62,22 @@ public void gestionAnimation(){
             gestionAnimateur();
     }
 }
-public void gestionPlaning(){}
+public void gestionPlaning(){
+    System.out.println("\n1: Exporter le planning | 2: Afficher le planning | 3: Retour");
+    System.out.print("Saisissez un chiffre:");
+    int index = sc.nextInt();
+    switch (index){
+        case 1: ExporterPlanning(); break;
+        case 2: getPlanning(); break;
+        case 3: main(); break;
+        default:
+            System.out.println("Saisissez un chiffre correct");
+            gestionAnimateur();
+    }
+}
 
 
-//=========| Gestion Affichage Animateur |=========\\
+//=========| Gestion Animateur |=========\\
 public void InterfaceAddAnimateur(){
     System.out.print("\nAjout d'Animateur :\nNom : ");
     String nom = sc.next();
@@ -78,7 +102,7 @@ public void InterfaceAddAnimateur(){
     gestionAnimateur();
 }
 public void InterfaceDelAnimateur(){
-    getAnimateurListe(false);
+    getAnimateurListe(false, "");
     System.out.print("\nSuppression d'Animateur:\nId: ");
     int id = sc.nextInt();
 
@@ -94,7 +118,7 @@ public void InterfaceDelAnimateur(){
 
     if(trouve){
         String nom = animateursMain.get(indexATrouver).afficheInfo();
-        System.out.println("\nCes informations sont elles corrects ?\nId: "+id+"\n"+nom+"?\nOUI: 1 | NON: 2");
+        System.out.println("\nCes informations sont elles correctes ?\nId: "+id+"\n"+nom+"?\nOUI: 1 | NON: 2");
         int choix = sc.nextInt();
 
         if(choix == 1){
@@ -120,7 +144,7 @@ public void afficherAnimateur(Animateur animateur){
     System.out.println();
 }
 
-public void getAnimateurListe(boolean afficher){
+public void getAnimateurListe(boolean afficher, String lanceur){
     try {
         animateursMain.clear();
         Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
@@ -149,7 +173,12 @@ public void getAnimateurListe(boolean afficher){
         res.close();
         stmt.close();
         connexion.close();
-        if(afficher) gestionAnimateur();
+        if(afficher){
+            switch (lanceur){
+                case "gestionAnimateur": gestionAnimateur();
+                default:;
+            }
+        }
     } catch (SQLException exc) {
         System.out.println("ERREUR");
         exc.printStackTrace();
@@ -194,26 +223,58 @@ public void suprAnimateur(int idAnimateur){
 }
 
 
-//=========| Gestion Affichage Animation |=========\\
+//=========| Gestion Animation |=========\\
 public void InterfaceAddAnimation(){
+    boolean  temps=false;
     System.out.print("\nAjout d'Animation:\nNom: ");
     String nom = sc.next();
-    System.out.print("jour: ");
-    String  date = "-"+sc.nextInt()+"-";
-    System.out.print("mois: ");
-    date = date+sc.nextInt()+" ";
-    System.out.println("année: ");
-    date = sc.nextInt()+date;
+    String  date="";
+    String  dateTemp="";
+    while (temps==false){
+        System.out.print("jour: ");
+        dateTemp=""+sc.nextInt();
+        if(dateTemp.length()==1)dateTemp="0"+dateTemp;
+        date = "-"+dateTemp;
+        System.out.print("mois: ");
+        dateTemp=""+sc.nextInt();
+        if(dateTemp.length()==1)dateTemp="0"+dateTemp;
+        date = "-"+dateTemp+date;
+        System.out.print("année: ");
+        date = sc.nextInt()+date;
+        if(date.length()==10){
+            temps=true;
+            break;
+        }
+        System.out.println('\n'+date);
+        System.out.println("\nSaisie de la date invalide ! [format: dd:mm:aaaa]");
+    }
+
     System.out.println("Heure de debut: [format: hh:mm]");
-    String heureDebut = date+sc.next()+":00";
+    String heureDebut = sc.next()+":00";
     System.out.println("Heure de fin:     [format: hh:mm]");
-    String  heureFin = date+sc.next()+":00";
+    String  heureFin = sc.next()+":00";
     getTypeAnimation();
     System.out.print("\nId type animation: ");
     int idTypeAnim = sc.nextInt();
+    List<Animateur>animateurs=new ArrayList<>();
+    while (temps){
+        getAnimateurListe(true, "gestionAnimation");
+        System.out.println("\nAnimateur: [id attendus]");
+        int idAnimateur= sc.nextInt();
 
-    Animation newA = new Animation(animationMain.size(), nom,  heureDebut, heureFin, idTypeAnim);
-    createAnimation(newA);
+        for(Animateur animateur:animateursMain){
+            if (animateur.getId()==idAnimateur){
+                if (animateurs.contains(animateur)) System.out.println("Cette animateur est déjà présent dans cette animation !");
+                else animateurs.add(animateur);
+            }
+        }
+        System.out.println("Voulez vous mobiliser un autre animateur en plus? 1:OUI|2:NON");
+        int choix=sc.nextInt();
+        if(choix==2) temps=false;
+    }
+
+    Animation newA = new Animation(animationMain.size(), nom, date,  heureDebut, heureFin, idTypeAnim,animateurs);
+    createAnimation(newA, animateurs);
     animationMain.add(newA);
     newA.infosAnimation();
     gestionAnimation();
@@ -235,7 +296,7 @@ public void InterfaceDelAnimation(){
 
     if(trouve){
         String nom = animationMain.get(indexATrouver).getNom();
-        System.out.println("\nCes informations sont elles corrects ?\nID : "+id+"\nNom : "+nom+"?\nOUI: 1 | NON: 2");
+        System.out.println("\nCes informations sont elles correctes ?\nID : "+id+"\nNom : "+nom+"?\nOUI: 1 | NON: 2");
         int choix = sc.nextInt();
 
         if(choix == 1){
@@ -288,6 +349,7 @@ public void getTypeAnimation(){
 public void getAnimationListe(boolean afficher){
     try {
         animationMain.clear();
+        getAnimateurListe(false, "");
         Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
         Statement stmt = connexion.createStatement();
         String requete = "SELECT * FROM Animation";
@@ -297,11 +359,27 @@ public void getAnimationListe(boolean afficher){
         while (res.next()) {
             int idAnimation = res.getInt("IdAnimation");
             String nom = res.getString("NomAnim");
+            String date = res.getString("Date");
             String heureDebut = res.getString("HeureDebutAnim");
             String heureFin = res.getString("HeureFinAnim");
             int idTypeAnim = res.getInt("IdTypeAnim");
 
-            Animation animation = new Animation(idAnimation, nom, heureDebut, heureFin, idTypeAnim);
+            // Récupération des animateurs associés à l'animation
+            List<Animateur> animateurs = new ArrayList<>();
+            String requeteAnimateurs = "SELECT * FROM animer WHERE IdAnimation = ?";
+            PreparedStatement pstmtAnimateurs = connexion.prepareStatement(requeteAnimateurs);
+            pstmtAnimateurs.setInt(1, idAnimation);
+            ResultSet resAnimateurs = pstmtAnimateurs.executeQuery();
+            while (resAnimateurs.next()) {
+                int idAnimateur = resAnimateurs.getInt("IdAnimateur");
+                for (Animateur animateur : animateursMain) {
+                    if (animateur.getId() == idAnimateur) {
+                        animateurs.add(animateur);
+                    }
+                }
+            }
+
+            Animation animation = new Animation(idAnimation, nom, date, heureDebut, heureFin, idTypeAnim, animateurs);
             animationMain.add(animation);
             if(afficher) afficherAnimation(animation);
         }
@@ -316,24 +394,33 @@ public void getAnimationListe(boolean afficher){
         gestionAnimation();
     }
 }
-public void createAnimation(Animation animation){
+public void createAnimation(Animation animation, List<Animateur> animateurs){
     try {
         Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
-        String requete = "INSERT INTO Animation (NomAnim, HeureDebutAnim, HeureFinAnim, IdTypeAnim) VALUES (?, ?, ?, ?)";
+        String requete = "INSERT INTO Animation (NomAnim, Date, HeureDebutAnim, HeureFinAnim, IdTypeAnim) VALUES (?, ?, ?, ?, ?)";
         PreparedStatement pstmt = connexion.prepareStatement(requete, Statement.RETURN_GENERATED_KEYS);
         pstmt.setString(1, animation.getNom());
-        pstmt.setString(2, animation.getHeureDebut());
-        pstmt.setString(3, animation.getHeureFin());
-        pstmt.setInt(4, animation.getIdTypeAnim());
+        pstmt.setString(2, animation.getDate());
+        pstmt.setString(3, animation.getHeureDebut());
+        pstmt.setString(4, animation.getHeureFin());
+        pstmt.setInt(5, animation.getIdTypeAnim());
         pstmt.executeUpdate();
-
         ResultSet rs = pstmt.getGeneratedKeys();
         int idAnimation = 0;
         if (rs.next()) {
             idAnimation = rs.getInt(1);
         }
-
         pstmt.close();
+
+        for (int i = 0; i < animateurs.size(); i++) {
+            requete = "INSERT INTO animer (IdAnimateur, IdAnimation) VALUES (?, ?)";
+            pstmt = connexion.prepareStatement(requete, Statement.RETURN_GENERATED_KEYS);
+            pstmt.setInt(1, animateurs.get(i).getId());
+            pstmt.setInt(2, idAnimation);
+            pstmt.executeUpdate();
+            pstmt.close();
+        }
+
         connexion.close();
     } catch (SQLException exc) {
         System.out.println("ERREUR");
@@ -354,4 +441,76 @@ public void suprAnimation(int idAnimation){
         System.out.println("ERREUR");
         exc.printStackTrace();
     }
+}
+
+//=========| Gestion Planning |=========\\
+public void ExporterPlanning() {
+    try {
+        Map<LocalDate, List<Animation>> planning = getPlanning();
+        Document document = new Document();
+        PdfWriter.getInstance(document, new FileOutputStream("planning.pdf"));
+        document.open();
+
+        TreeMap<LocalDate, List<Animation>>sortedMap = new TreeMap<>(planning);
+        boolean hasContent = false;
+        for (Map.Entry<LocalDate, List<Animation>> entry : sortedMap.entrySet()) {
+            document.add(new Paragraph("\nAnimations du " + entry.getKey()));
+
+            for (Animation animation : entry.getValue()) {
+                document.add(new Paragraph("    -"+animation.getNom()+" : "+animation.getHeureDebut() + " - " + animation.getHeureFin()+" | "+animation.getAnimateurs()+"\n"));
+                hasContent = true;
+            }
+        }
+
+        if (!hasContent) {
+            document.add(new Paragraph("Aucune animation à afficher pour cette semaine.")); // force une page
+        }
+
+        document.close();
+        System.out.println("Fichier PDF créé avec succès !");
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+
+public Map<LocalDate, List<Animation>> getPlanning() {
+    getAnimateurListe(false, "");
+    Map<LocalDate, List<Animation>> planning = new HashMap<>();
+    try (Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
+         Statement stmt = connexion.createStatement();
+         ResultSet res = stmt.executeQuery("SELECT * FROM Animation WHERE `Date` >= CURDATE() AND `Date` < CURDATE() + INTERVAL 7 DAY ORDER BY `Date` ASC")) {
+
+        while (res.next()) {
+            int id = res.getInt("IdAnimation");
+            String nom = res.getString("NomAnim");
+            String dateStr = res.getString("Date");
+            String heureDebutStr = res.getString("HeureDebutAnim");
+            String heureFinStr = res.getString("HeureFinAnim");
+            int idTypeAnim = res.getInt("IdTypeAnim");
+            // Animateurs de l'animation
+            List<Animateur> animateurs = new ArrayList<>();
+            try (PreparedStatement pstmt = connexion.prepareStatement(
+                    "SELECT * FROM animer WHERE IdAnimation = ?")) {
+                pstmt.setInt(1, id);
+                try (ResultSet rA = pstmt.executeQuery()) {
+                    while (rA.next()) {
+                        int idA = rA.getInt("IdAnimateur");
+                        for (Animateur a : animateursMain) {
+                            if (a.getId() == idA) {
+                                animateurs.add(a);
+                            }
+                        }
+                    }
+                }
+            }
+
+            LocalDate date = LocalDate.parse(dateStr);
+            Animation animation = new Animation(id, nom, dateStr, heureDebutStr, heureFinStr, idTypeAnim, animateurs);
+
+            planning.computeIfAbsent(date, k -> new ArrayList<>()).add(animation);
+        }
+    } catch (SQLException e) {
+        throw new RuntimeException(e);
+    }
+    return planning;
 }
