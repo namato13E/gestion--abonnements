@@ -60,6 +60,16 @@ public class Animation{
             else anim+=", "+animateurs.get(i).getNom()+" "+animateurs.get(i).getPrenom();
         }
         if (animateurs.size()==0)anim+="vide";
-        return "Id: "+id+", nom: "+nom+", dateDebut: "+heureDebut+", dateFin: "+heureFin+", idTypeAnim: "+idTypeAnim+", "+anim+" ]";
+        return "Id: "+id+", nom: "+nom+", date: "+date+", heureDebut: "+heureDebut+", heureFin: "+heureFin+", idTypeAnim: "+idTypeAnim+", "+anim+" ]";
+    }
+
+    public String infoMinimum(){
+        String  anim="Animateurs: [ ";
+        for (int i = 0; i < animateurs.size(); i++) {
+            if (i==0) anim+=animateurs.get(i).getNom()+" "+animateurs.get(i).getPrenom();
+            else anim+=", "+animateurs.get(i).getNom()+" "+animateurs.get(i).getPrenom();
+        }
+        if (animateurs.size()==0)anim+="vide";
+        return "Id: "+id+", nom: "+nom+", date: "+date+", idTypeAnim: "+idTypeAnim+", "+anim+" ]";
     }
 }
