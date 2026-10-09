@@ -5,33 +5,33 @@ import java.util.*;
 import com.lowagie.text.Document;
 import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.PdfWriter;
-
+import java.security.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 public  Scanner sc =new Scanner(System.in);
-private final List<Animateur> animateursMain=new ArrayList<>();
-private List<Animation> animationMain=new ArrayList<>();
-private HashMap<Integer, String> typeAnimation=new HashMap<>();
-private HashMap<Animation, Animateur[]> planning=new HashMap<>();
+public final List<Animateur> animateursMain=new ArrayList<>();
+public List<Animation> animationMain=new ArrayList<>();
+public HashMap<Integer, String> typeAnimation=new HashMap<>();
+public HashMap<Animation, Animateur[]> planning=new HashMap<>();
 
 public String URL = "jdbc:mysql://172.17.0.18:3306/apCamping";
 public String LOGIN = "Himation";
 public String PASSWORD = "Camping@Anee_2027";
+private String  connected=null;
 
 void main() {
-    System.out.println("\n1: Gestion Animateur | 2: Gestion Animation | 3: Planification");
+    while (connected == null) connect();
+    System.out.println("\n1: Gestion Animateur | 2: Gestion Animation | 3: Planification | 4: Déconnexion");
     System.out.print("Saisissez un chiffre:");
     int index=sc.nextInt();
     switch (index){
         case 1:gestionAnimateur();
         case 2:gestionAnimation();
         case 3:gestionPlaning();
+        case 4:connected=null; main();
         default:
             main();
     }
-}
-
-public void login(){
-    System.out.println("Bienvenus ");
 }
 
 public void gestionAnimateur(){
@@ -68,7 +68,7 @@ public void gestionPlaning(){
     int index = sc.nextInt();
     switch (index){
         case 1: ExporterPlanning(); break;
-        case 2: getPlanning(); break;
+        case 2: afficherPlanning(); break;
         case 3: main(); break;
         default:
             System.out.println("Saisissez un chiffre correct");
@@ -444,6 +444,25 @@ public void suprAnimation(int idAnimation){
 }
 
 //=========| Gestion Planning |=========\\
+public void afficherPlanning() {
+    Map<LocalDate, List<Animation>> planning = getPlanning();
+    TreeMap<LocalDate, List<Animation>>sortedMap = new TreeMap<>(planning);
+    boolean hasContent = false;
+    for (Map.Entry<LocalDate, List<Animation>> entry : sortedMap.entrySet()) {
+        String date = entry.getKey().format(DateTimeFormatter.ofPattern("dd/MM/uuuu"));
+        System.out.println("\nAnimations du " + date);
+
+        for (Animation animation : entry.getValue()) {
+            System.out.println("    -"+animation.getNom()+" : "+animation.getHeureDebut() + " - " + animation.getHeureFin()+" | "+animation.getAnimateurs());
+            hasContent = true;
+        }
+    }
+
+    if (!hasContent) {
+        System.out.println("Aucune animation à afficher pour cette semaine.");
+    }
+}
+
 public void ExporterPlanning() {
     try {
         Map<LocalDate, List<Animation>> planning = getPlanning();
@@ -454,7 +473,8 @@ public void ExporterPlanning() {
         TreeMap<LocalDate, List<Animation>>sortedMap = new TreeMap<>(planning);
         boolean hasContent = false;
         for (Map.Entry<LocalDate, List<Animation>> entry : sortedMap.entrySet()) {
-            document.add(new Paragraph("\nAnimations du " + entry.getKey()));
+            String date = entry.getKey().format(DateTimeFormatter.ofPattern("d/MM/uuuu"));
+            document.add(new Paragraph("\nAnimations du " + date));
 
             for (Animation animation : entry.getValue()) {
                 document.add(new Paragraph("    -"+animation.getNom()+" : "+animation.getHeureDebut() + " - " + animation.getHeureFin()+" | "+animation.getAnimateurs()+"\n"));
@@ -463,7 +483,7 @@ public void ExporterPlanning() {
         }
 
         if (!hasContent) {
-            document.add(new Paragraph("Aucune animation à afficher pour cette semaine.")); // force une page
+            document.add(new Paragraph("Aucune animation à afficher pour cette semaine."));
         }
 
         document.close();
@@ -472,7 +492,6 @@ public void ExporterPlanning() {
         e.printStackTrace();
     }
 }
-
 public Map<LocalDate, List<Animation>> getPlanning() {
     getAnimateurListe(false, "");
     Map<LocalDate, List<Animation>> planning = new HashMap<>();
@@ -506,11 +525,55 @@ public Map<LocalDate, List<Animation>> getPlanning() {
 
             LocalDate date = LocalDate.parse(dateStr);
             Animation animation = new Animation(id, nom, dateStr, heureDebutStr, heureFinStr, idTypeAnim, animateurs);
-
             planning.computeIfAbsent(date, k -> new ArrayList<>()).add(animation);
         }
     } catch (SQLException e) {
         throw new RuntimeException(e);
     }
     return planning;
+}
+
+//=========| Gestion Connexion |=========\\
+public void connect() {
+    try {
+        clearScreen();
+        System.out.print("\nSaisissez votre matricule: ");
+        String ident = sc.next();
+        System.out.print("Saisissez votre mot de passe: ");
+        String mdp = new String(System.console().readPassword());
+
+        Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
+        String requete = "SELECT * FROM animateur WHERE Identifiant=?;";
+        PreparedStatement pstmt = connexion.prepareStatement(requete);
+        pstmt.setString(1, ident);
+        ResultSet res = pstmt.executeQuery();
+
+        if (res.next()) {
+            if(BCrypt.checkpw(mdp, res.getString("Mdp"))){
+                connected=ident;
+                clearScreen();
+                System.out.println("Bienvenus "+ident);
+            }
+            else {
+                System.out.println("Erreur d'identifiants");
+                connect();
+            }
+        } else {
+            System.out.println("Erreur d'identifiants");
+        }
+    } catch (SQLException exc) {
+        System.out.println("Erreur de connexion");
+        exc.printStackTrace();
+    }
+}
+public static String hashPassword(String password) {
+    int tailleSel = 12;
+    String salt = BCrypt.gensalt(tailleSel);
+
+    return BCrypt.hashpw(password, salt);
+}
+public static void clearScreen() {
+    for (int i = 0; i < 50; i++) {
+        System.out.println();
+    }
 }
