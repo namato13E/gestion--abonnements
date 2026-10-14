@@ -21,16 +21,18 @@ private String  connected=null;
 
 void main() {
     while (connected == null) connect();
-    System.out.println("\n1: Gestion Animateur | 2: Gestion Animation | 3: Planification | 4: Déconnexion");
-    System.out.print("Saisissez un chiffre:");
-    int index=sc.nextInt();
-    switch (index){
-        case 1:gestionAnimateur();
-        case 2:gestionAnimation();
-        case 3:gestionPlaning();
-        case 4:connected=null; main();
-        default:
-            main();
+    if(connected=="ahimation"||connected=="AHimation"){
+        System.out.println("\n1: Gestion Animateur | 2: Gestion Animation | 3: Planification | 4: Déconnexion");
+        System.out.print("Saisissez un chiffre:");
+        int index=sc.nextInt();
+        switch (index){
+            case 1:gestionAnimateur();
+            case 2:gestionAnimation();
+            case 3:gestionPlaning();
+            case 4:connected=null; main();
+            default:
+                main();
+        }
     }
 }
 
@@ -125,7 +127,6 @@ public void InterfaceDelAnimateur(){
         if(choix == 1){
             suprAnimateur(id);
             animateursMain.removeIf(a -> a.getId() == id);
-            System.out.println("Animateur supprimé avec succès.");
         } else {
             System.out.println("Retour au menu.");
         }
@@ -213,19 +214,30 @@ public void createAnimateur(Animateur animateur){
 public void suprAnimateur(int idAnimateur){
     try {
         Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
-        String requete = "DELETE FROM `animer` WHERE  `IdAnimateur`=?;";
+        String requete = "SELECT COUNT(*) AS Anime FROM `animer` WHERE  `IdAnimateur`=?;";
         PreparedStatement pstmt = connexion.prepareStatement(requete);
         pstmt.setInt(1, idAnimateur);
-        pstmt.executeUpdate();
 
-        pstmt.close();
+        if (!pstmt.executeQuery().next()) {
+            pstmt.close();
 
-        requete = "DELETE FROM `apCamping`.`animateur` WHERE  `IdAnim`=?;";
-        pstmt = connexion.prepareStatement(requete);
-        pstmt.setInt(1, idAnimateur);
-        pstmt.executeUpdate();
+            requete = "DELETE FROM `animer` WHERE  `IdAnimateur`=?;";
+            pstmt = connexion.prepareStatement(requete);
+            pstmt.setInt(1, idAnimateur);
+            pstmt.executeUpdate();
+            pstmt.close();
 
-        pstmt.close();
+            requete = "DELETE FROM `apCamping`.`animateur` WHERE  `IdAnim`=?;";
+            pstmt = connexion.prepareStatement(requete);
+            pstmt.setInt(1, idAnimateur);
+            pstmt.executeUpdate();
+            pstmt.close();
+
+            System.out.println("Animateur supprimé avec succès.");
+        }else{
+            pstmt.close();
+            System.out.println("L'animateur a déjà animer une activité, on ne peux donc pas le retirer des registres.");
+        }
         connexion.close();
     } catch (SQLException exc) {
         System.out.println("ERREUR");
@@ -506,7 +518,7 @@ public void ajoutAnimateurAnimation(int idAnimateur, int idAnimation){
 
         String requete = "INSERT INTO animer (IdAnimateur, IdAnimation) VALUES (?, ?)";
         PreparedStatement pstmt = connexion.prepareStatement(requete, Statement.RETURN_GENERATED_KEYS);
-        pstmt.setInt(1, idAnimation);
+        pstmt.setInt(1, idAnimateur);
         pstmt.setInt(2, idAnimation);
         pstmt.executeUpdate();
         pstmt.close();
