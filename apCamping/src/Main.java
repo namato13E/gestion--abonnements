@@ -18,6 +18,8 @@ public String URL = "jdbc:mysql://172.17.0.18:3306/apCamping";
 public String LOGIN = "Himation";
 public String PASSWORD = "Camping@Anee_2027";
 private String  connected=null;
+private boolean bool1 = true;
+private boolean bool2 = true;
 
 void main() {
     while (connected == null) connect();
@@ -101,10 +103,26 @@ public void InterfaceAddAnimateur(){
     String[] coordonee = new String[5];
     System.out.print("Mail : ");
     coordonee[0] = sc.next();
-    System.out.print("Téléphone : ");
-    coordonee[4] = sc.next();
-    System.out.print("Code Postale : ");
-    coordonee[3] = sc.next();
+    while (bool1){
+        System.out.print("Téléphone : ");
+        coordonee[4] = sc.next();
+        if (coordonee[4].matches(".*[a-zA-Z].*") || coordonee[4].length()!=10){
+            System.out.print("Votre numéros de téléphone comprend des caractères non numériques\n");
+        }
+        else{
+            bool1 = false;
+        }
+    }
+    while (bool2){
+        System.out.print("Code Postale : ");
+        coordonee[3] = sc.next();
+        if (coordonee[3].matches(".*[a-zA-Z].*") || coordonee[3].length()!=5){
+            System.out.print("Votre code postal comprend des caractères non numériques\n");
+        }
+        else{
+            bool2 = false;
+        }
+    }
     System.out.print("Ville : ");
     coordonee[2] = sc.next();
     System.out.print("Adresse : ");
