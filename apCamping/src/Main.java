@@ -18,8 +18,6 @@ public String URL = "jdbc:mysql://172.17.0.18:3306/apCamping";
 public String LOGIN = "Himation";
 public String PASSWORD = "Camping@Anee_2027";
 private String  connected=null;
-private boolean bool1 = true;
-private boolean bool2 = true;
 
 void main() {
     while (connected == null) connect();
@@ -96,32 +94,31 @@ public void gestionPlaning(){
 
 //=========| Gestion Animateur |=========\\
 public void InterfaceAddAnimateur(){
+    boolean co=false;
+    String num="0,1,2,3,4,5,6,7,8,9";
+
     System.out.print("\nAjout d'Animateur :\nNom : ");
     String nom = sc.next();
     System.out.print("Prénom : ");
     String prenom = sc.next();
     String[] coordonee = new String[5];
-    System.out.print("Mail : ");
-    coordonee[0] = sc.next();
-    while (bool1){
+    while(!co){
+        System.out.print("Mail : ");
+        coordonee[0] = sc.next();
+        if(coordonee[0].contains("@") && coordonee[0].contains(".")){ co=true; break;}
+        System.out.println("ERREUR! Votre email ne contient pas l'un de ces deux éléments : '@' ou '.'");
+    }
+    while(co){
         System.out.print("Téléphone : ");
         coordonee[4] = sc.next();
-        if (coordonee[4].matches(".*[a-zA-Z].*") || coordonee[4].length()!=10){
-            System.out.print("Votre numéros de téléphone comprend des caractères non numériques\n");
-        }
-        else{
-            bool1 = false;
-        }
+        if(!coordonee[4].matches(".*[a-zA-Z].*") && coordonee[4].length() == 10){ co=false; break; }
+        System.out.println("ERREUR! Votre numéro de téléphone contient autre chose que des chiffres ou ne comporte pas 10 numéros.");
     }
-    while (bool2){
+    while(!co){
         System.out.print("Code Postale : ");
         coordonee[3] = sc.next();
-        if (coordonee[3].matches(".*[a-zA-Z].*") || coordonee[3].length()!=5){
-            System.out.print("Votre code postal comprend des caractères non numériques\n");
-        }
-        else{
-            bool2 = false;
-        }
+        if (!coordonee[3].matches(".*[a-zA-Z].*") && coordonee[3].length()==5){ co=true; break; }
+        System.out.println("ERREUR! Votre code postale contient autre chose que des chiffres ou ne comporte pas 5 numéros.");
     }
     System.out.print("Ville : ");
     coordonee[2] = sc.next();
@@ -281,14 +278,15 @@ public void createAnimateur(Animateur animateur){
 public void suprAnimateur(int idAnimateur){
     try {
         Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
-        String requete = "SELECT COUNT(*) AS Anime FROM `animer` AS an INNER JOIN `Animation` AS a ON an.`IdAnimation`=a.`IdAnim` WHERE  `IdAnimateur`=? AND a.`Date` <= CURDATE() ORDER BY a.`Date` ASC;";
+        String requete = "SELECT COUNT(*) AS Anime FROM `animer` AS an INNER JOIN `Animation` AS a ON an.`IdAnimation`=a.`IdAnimation` WHERE  `IdAnimateur`=? AND a.`Date` <= CURDATE() ORDER BY a.`Date` ASC;";
         PreparedStatement pstmt = connexion.prepareStatement(requete);
         pstmt.setInt(1, idAnimateur);
-
-        if (!pstmt.executeQuery().next()) {
+        ResultSet res=pstmt.executeQuery();
+        if (res.next() && res.getInt("Anime")==0) {
+            res.close();
             pstmt.close();
 
-            requete = "DELETE an FROM `animer` AS an INNER JOIN `Animation` AS a ON an.`IdAnimation`=a.`IdAnim` WHERE  `IdAnimateur`=? AND a.`Date` >= CURDATE();";
+            requete = "DELETE an FROM `animer` AS an INNER JOIN `Animation` AS a ON an.`IdAnimation`=a.`IdAnimation` WHERE  `IdAnimateur`=? AND a.`Date` >= CURDATE();";
             pstmt = connexion.prepareStatement(requete);
             pstmt.setInt(1, idAnimateur);
             pstmt.executeUpdate();
