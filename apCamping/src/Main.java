@@ -21,7 +21,7 @@ private String  connected=null;
 
 void main() {
     while (connected == null) connect();
-    if(connected=="ahimation"||connected=="AHimation"){
+    if("ahimation".equalsIgnoreCase(connected)){
         System.out.println("\n1: Gestion Animateur | 2: Gestion Animation | 3: Planification | 4: Déconnexion");
         System.out.print("Saisissez un chiffre:");
         int index=sc.nextInt();
@@ -34,17 +34,29 @@ void main() {
                 main();
         }
     }
+    else{
+        System.out.println("\n1: Mes missions | 2: Démission | 3: Changer mdp | 4: Déconnexion");
+        System.out.print("Saisissez un chiffre:");
+        int index=sc.nextInt();
+        switch (index){
+            case 1:afficherPlanning();
+            case 2:demission();
+            case 3:changerMdp();
+            case 4:connected=null; main();
+        }
+    }
 }
 
 public void gestionAnimateur(){
-    System.out.println("\n1: Ajouter un Animateur | 2: Liste d'animateurs | 3: Supprimer un Animateur | 4: Retour");
+    System.out.println("\n1: Ajouter un Animateur | 2: Liste d'animateurs | 3: Supprimer un Animateur | 4: Modifier son mot de passe | 5: Retour");
     System.out.print("Saisissez un chiffre:");
     int index = sc.nextInt();
     switch (index){
         case 1: InterfaceAddAnimateur(); break;
         case 2: getAnimateurListe(true, "gestionAnimateur",true); break;
         case 3: InterfaceDelAnimateur(); break;
-        case 4: main(); break;
+        case 4: changerMdp(); break;
+        case 5: main(); break;
         default:
             System.out.println("Saisissez un chiffre correct");
             gestionAnimateur();
@@ -99,9 +111,9 @@ public void InterfaceAddAnimateur(){
     coordonee[1] = sc.next();
 
     Animateur newA = new Animateur(animateursMain.size(), nom, prenom, coordonee);
-    createAnimateur(newA);
     animateursMain.add(newA);
-    System.out.println("\nCréation de l'animateur réalisé avec succès");
+    createAnimateur(newA);
+    System.out.println("\nCréation de l'animateur réalisé avec succès\nSes identifiants sont: "+newA.getIdentifiant()+" et mot de passe : 0550002D (temporaire)");
     gestionAnimateur();
 }
 public void InterfaceDelAnimateur(){
@@ -148,6 +160,27 @@ public void afficherAnimateur(Animateur animateur, boolean donne){
     }
     System.out.println();
 }
+public void demission() {
+    Animateur animateur = getAnimateur(connected);
+    System.out.println("Voulez vous vraiment démissionner?  [OUI:1 | NON:2]");
+    int choix=sc.nextInt();
+    if(choix==1){
+        try {
+            Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
+            String requete = "UPDATE animateur SET Identifiant=?, Mdp=? WHERE Identifiant=?";
+            PreparedStatement pstmt = connexion.prepareStatement(requete);
+            pstmt.setString(1, null);
+            pstmt.setString(2, null);
+            pstmt.setString(3, connected);
+            pstmt.executeUpdate();
+            pstmt.close();
+            suprAnimateur(animateur.getId());
+            main();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
 
 public void getAnimateurListe(boolean afficher, String lanceur, boolean donne){
     try {
@@ -190,10 +223,24 @@ public void getAnimateurListe(boolean afficher, String lanceur, boolean donne){
         gestionAnimateur();
     }
 }
+public Animateur getAnimateur(String identifiant){
+    getAnimateurListe(false, "",false);
+    for(Animateur animateur:animateursMain){
+        if("ahimation".equalsIgnoreCase(connected)){
+            animateur=animateursMain.getFirst();
+            System.out.println(animateur.afficheInfo());
+            return animateur;
+        }
+        if (animateur.getIdentifiant().equals(identifiant)){
+            return animateur;
+        }
+    }
+    return null;
+}
 public void createAnimateur(Animateur animateur){
     try {
         Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
-        String requete = "INSERT INTO animateur (Nom, Prenom, Mail, Adresse, Ville, CodePostal, Tel) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String requete = "INSERT INTO animateur (Nom, Prenom, Mail, Adresse, Ville, CodePostal, Tel, Identifiant, Mdp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement pstmt = connexion.prepareStatement(requete);
         pstmt.setString(1, animateur.getNom());
         pstmt.setString(2, animateur.getPrenom());
@@ -202,6 +249,8 @@ public void createAnimateur(Animateur animateur){
         pstmt.setString(5, animateur.getCoordonees()[2]);
         pstmt.setString(6, animateur.getCoordonees()[3]);
         pstmt.setString(7, animateur.getCoordonees()[4]);
+        pstmt.setString(8, animateur.getIdentifiant());
+        pstmt.setString(9, hashPassword("0550002D"));
         pstmt.executeUpdate();
 
         pstmt.close();
@@ -214,14 +263,14 @@ public void createAnimateur(Animateur animateur){
 public void suprAnimateur(int idAnimateur){
     try {
         Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
-        String requete = "SELECT COUNT(*) AS Anime FROM `animer` WHERE  `IdAnimateur`=?;";
+        String requete = "SELECT COUNT(*) AS Anime FROM `animer` AS an INNER JOIN `Animation` AS a ON an.`IdAnimation`=a.`IdAnim` WHERE  `IdAnimateur`=? AND a.`Date` <= CURDATE() ORDER BY a.`Date` ASC;";
         PreparedStatement pstmt = connexion.prepareStatement(requete);
         pstmt.setInt(1, idAnimateur);
 
         if (!pstmt.executeQuery().next()) {
             pstmt.close();
 
-            requete = "DELETE FROM `animer` WHERE  `IdAnimateur`=?;";
+            requete = "DELETE an FROM `animer` AS an INNER JOIN `Animation` AS a ON an.`IdAnimation`=a.`IdAnim` WHERE  `IdAnimateur`=? AND a.`Date` >= CURDATE();";
             pstmt = connexion.prepareStatement(requete);
             pstmt.setInt(1, idAnimateur);
             pstmt.executeUpdate();
@@ -231,13 +280,12 @@ public void suprAnimateur(int idAnimateur){
             pstmt = connexion.prepareStatement(requete);
             pstmt.setInt(1, idAnimateur);
             pstmt.executeUpdate();
-            pstmt.close();
 
             System.out.println("Animateur supprimé avec succès.");
         }else{
-            pstmt.close();
             System.out.println("L'animateur a déjà animer une activité, on ne peux donc pas le retirer des registres.");
         }
+        pstmt.close();
         connexion.close();
     } catch (SQLException exc) {
         System.out.println("ERREUR");
@@ -491,10 +539,12 @@ public void ajoutAnimateurAnimation(int idAnimateur, int idAnimation){
     boolean AnimationExist=false;
     boolean AnimateurExist=false;
 
+    Animateur animateurTrouve = null;
     for (Animateur animateur: animateursMain) {
         if (animateur.getId() == idAnimateur) {
-            animationMain.indexOf(idAnimateur);
-            AnimateurExist=true; break;
+            animateurTrouve = animateur;
+            AnimateurExist=true;
+            break;
         }
     }
     if (!AnimateurExist){
@@ -502,8 +552,10 @@ public void ajoutAnimateurAnimation(int idAnimateur, int idAnimation){
         return;
     }
 
+    Animation animationTrouve = null;
     for (Animation animation: animationMain) {
         if(animation.getId()==idAnimation){
+            animationTrouve = animation;
             AnimationExist=true;
             break;
         }
@@ -515,20 +567,32 @@ public void ajoutAnimateurAnimation(int idAnimateur, int idAnimation){
 
     try {
         Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
-
-        String requete = "INSERT INTO animer (IdAnimateur, IdAnimation) VALUES (?, ?)";
-        PreparedStatement pstmt = connexion.prepareStatement(requete, Statement.RETURN_GENERATED_KEYS);
+        String requete = "SELECT COUNT(*) AS Animer FROM `animer` WHERE  `IdAnimateur`=? AND `IdAnimation`=?;";
+        PreparedStatement pstmt = connexion.prepareStatement(requete);
         pstmt.setInt(1, idAnimateur);
         pstmt.setInt(2, idAnimation);
-        pstmt.executeUpdate();
-        pstmt.close();
 
+        if (!pstmt.executeQuery().next()) {
+            pstmt.close();
+
+            requete = "INSERT INTO animer (IdAnimateur, IdAnimation) VALUES (?, ?)";
+            pstmt = connexion.prepareStatement(requete, Statement.RETURN_GENERATED_KEYS);
+            pstmt.setInt(1, idAnimateur);
+            pstmt.setInt(2, idAnimation);
+            pstmt.executeUpdate();
+        }
+        else{
+            System.out.println("Cette animateur anime déjà cette animation!");
+
+        }
+        pstmt.close();
         connexion.close();
     } catch (SQLException exc) {
         System.out.println("ERREUR");
         exc.printStackTrace();
     }
 }
+
 
 //=========| Gestion Planning |=========\\
 public void afficherPlanning() {
@@ -582,42 +646,81 @@ public void ExporterPlanning() {
     }
 }
 public Map<LocalDate, List<Animation>> getPlanning() {
-    getAnimateurListe(false, "",false);
     Map<LocalDate, List<Animation>> planning = new HashMap<>();
-    try (Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
-         Statement stmt = connexion.createStatement();
-         ResultSet res = stmt.executeQuery("SELECT * FROM Animation WHERE `Date` >= CURDATE() AND `Date` < CURDATE() + INTERVAL 7 DAY ORDER BY `Date` ASC")) {
+    Animateur anim = getAnimateur(connected);
 
-        while (res.next()) {
-            int id = res.getInt("IdAnimation");
-            String nom = res.getString("NomAnim");
-            String dateStr = res.getString("Date");
-            String heureDebutStr = res.getString("HeureDebutAnim");
-            String heureFinStr = res.getString("HeureFinAnim");
-            int idTypeAnim = res.getInt("IdTypeAnim");
-            // Animateurs de l'animation
-            List<Animateur> animateurs = new ArrayList<>();
-            try (PreparedStatement pstmt = connexion.prepareStatement(
-                    "SELECT * FROM animer WHERE IdAnimation = ?")) {
-                pstmt.setInt(1, id);
-                try (ResultSet rA = pstmt.executeQuery()) {
-                    while (rA.next()) {
-                        int idA = rA.getInt("IdAnimateur");
-                        for (Animateur a : animateursMain) {
-                            if (a.getId() == idA) {
-                                animateurs.add(a);
+    if("ahimation".equalsIgnoreCase(connected)){
+        try (Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
+             Statement stmt = connexion.createStatement();
+             ResultSet res = stmt.executeQuery("SELECT * FROM Animation As a WHERE a.`Date` >= CURDATE() AND a.`Date` < CURDATE() + INTERVAL 7 DAY ORDER BY a.`Date` ASC")) {
+
+            while (res.next()) {
+                int id = res.getInt("IdAnimation");
+                String nom = res.getString("NomAnim");
+                String dateStr = res.getString("Date");
+                String heureDebutStr = res.getString("HeureDebutAnim");
+                String heureFinStr = res.getString("HeureFinAnim");
+                int idTypeAnim = res.getInt("IdTypeAnim");
+                // Animateurs de l'animation
+                List<Animateur> animateurs = new ArrayList<>();
+                try (PreparedStatement pstmt = connexion.prepareStatement(
+                        "SELECT * FROM animer WHERE IdAnimation = ?")) {
+                    pstmt.setInt(1, id);
+                    try (ResultSet rA = pstmt.executeQuery()) {
+                        while (rA.next()) {
+                            int idA = rA.getInt("IdAnimateur");
+                            for (Animateur a : animateursMain) {
+                                if (a.getId() == idA) {
+                                    animateurs.add(a);
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            LocalDate date = LocalDate.parse(dateStr);
-            Animation animation = new Animation(id, nom, dateStr, heureDebutStr, heureFinStr, idTypeAnim, animateurs);
-            planning.computeIfAbsent(date, k -> new ArrayList<>()).add(animation);
+                LocalDate date = LocalDate.parse(dateStr);
+                Animation animation = new Animation(id, nom, dateStr, heureDebutStr, heureFinStr, idTypeAnim, animateurs);
+                planning.computeIfAbsent(date, k -> new ArrayList<>()).add(animation);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
-    } catch (SQLException e) {
-        throw new RuntimeException(e);
+    }
+    if (anim == null) {
+        System.out.println("Erreur : Aucun animateur trouvé pour l'identifiant : " + connected);
+        return planning;
+    }
+    else {
+        String query = "SELECT * FROM Animation As a " +
+                "INNER JOIN animer As an ON a.IdAnimation = an.IdAnimation " +
+                "WHERE an.IdAnimateur = ? AND a.`Date` >= CURDATE() " +
+                "AND a.`Date` < CURDATE() + INTERVAL 7 DAY ORDER BY a.`Date` ASC";
+
+        try (Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
+             PreparedStatement pstmt = connexion.prepareStatement(query)) {
+
+            pstmt.setInt(1, anim.getId());
+
+            try (ResultSet res = pstmt.executeQuery()) {
+                while (res.next()) {
+                    int id = res.getInt("IdAnimation");
+                    String nom = res.getString("NomAnim");
+                    String dateStr = res.getString("Date");
+                    String heureDebutStr = res.getString("HeureDebutAnim");
+                    String heureFinStr = res.getString("HeureFinAnim");
+                    int idTypeAnim = res.getInt("IdTypeAnim");
+
+                    List<Animateur> animateurs = new ArrayList<>();
+                    animateurs.add(anim);
+
+                    LocalDate date = LocalDate.parse(dateStr);
+                    Animation animation = new Animation(id, nom, dateStr, heureDebutStr, heureFinStr, idTypeAnim, animateurs);
+                    planning.computeIfAbsent(date, k -> new ArrayList<>()).add(animation);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
     return planning;
 }
@@ -643,6 +746,10 @@ public void connect() {
                 connected=ident;
                 clearScreen();
                 System.out.println("Bienvenus "+ident);
+                if(BCrypt.checkpw("0550002D", res.getString("Mdp"))){
+                    System.out.println("Veuillez changer de mot de passe");
+                    changerMdp();
+                }
             }
             else {
                 System.out.println("Erreur d'identifiants");
@@ -653,6 +760,25 @@ public void connect() {
         }
     } catch (SQLException exc) {
         System.out.println("Erreur de connexion");
+        exc.printStackTrace();
+    }
+}
+public void changerMdp(){
+    System.out.println("Entrez votre nouveau mdp: ");
+    String mdp = sc.next();
+    try {
+        Connection connexion = DriverManager.getConnection(URL, LOGIN, PASSWORD);
+        String requete = "UPDATE `animateur` SET  `Mdp`=? WHERE Identifiant=?;";
+        PreparedStatement pstmt = connexion.prepareStatement(requete);
+        pstmt.setString(1, hashPassword(mdp));
+        pstmt.setString(2, connected);
+        pstmt.executeUpdate();
+        pstmt.close();
+        connexion.close();
+        clearScreen();
+        main();
+    } catch (SQLException exc) {
+        System.out.println("ERREUR");
         exc.printStackTrace();
     }
 }

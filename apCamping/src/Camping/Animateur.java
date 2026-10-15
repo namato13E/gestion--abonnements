@@ -5,6 +5,7 @@ public class Animateur {
     private String nom;
     private String prenom;
     private String[] coordonees;
+    public String identifiant;
 
     public Animateur(){}
 
@@ -13,6 +14,7 @@ public class Animateur {
         this.nom=nom;
         this.prenom=prenom;
         this.coordonees=coordonees;
+        this.identifiant= prenom.charAt(0)+nom;
     }
 
     public int getId() {
@@ -29,6 +31,9 @@ public class Animateur {
     }
     public String afficheInfo(){
         return "Nom: "+this.nom+", Prenom: "+this.prenom;
+    }
+    public String getIdentifiant() {
+        return identifiant;
     }
 
 }
