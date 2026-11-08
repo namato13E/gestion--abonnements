@@ -1,0 +1,5 @@
+{
+  "url": "jdbc:mysql://172.17.0.18:3306/apCamping",
+  "login": "Himation",
+  "password": "ton_mot_de_passe"
+}
