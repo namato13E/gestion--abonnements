@@ -19,4 +19,8 @@ public class DbConfig {
                     "Fichier de configuration introuvable : " + chemin, e);
         }
     }
+
+    public String getUrl()      { return url; }
+    public String getLogin()    { return login; }
+    public String getPassword() { return password; }
 }
