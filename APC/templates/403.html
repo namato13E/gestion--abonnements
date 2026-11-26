@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <h1>403</h1>
+    <p>"Désolé, erreur 403"</p>
+</div>
+{% endblock %}
+
+{% block footer %}
+<p>Retourner à l'accueil : 
+   <a href="{{ url_for('index') }}"><button>Accueil</button></a>
+</p>
+{% endblock %}
