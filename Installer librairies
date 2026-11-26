@@ -1,3 +1,6 @@
 JbCrypt: org.mindrot:jbcrypt:0.4
 OpenPdf: com.github.librepdf:openpdf:2.0.3
 Gson: com.google.code.gson:gson:2.10.1
+
+aller dans le dosier du projet et faire:
+python3 -m venv bdd_venv && source bdd_venv/bin/activate && pip install flask flask-sqlalchemy pymysql
