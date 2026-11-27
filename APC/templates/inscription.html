@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form method='POST' action='index.php?action=inscription'>
+				<h1>S'inscrire :</h1>
+				<br/>
+				<div class=form-group>
+					<label for="nom">Votre nom : </label>
+					<input type="text" name="nom" class="form-control" id="nom" required>
+				</div>
+				<div class="form-group">
+					<label for="prenom">Votre prénom : </label>
+					<input type="text" name="prenom" class="form-control" id="prenom" required>
+				</div>
+				<div class="form-group">
+					<label for="email">Adresse email : </label>
+					<input type="email" name="email" class="form-control" id="email" placeholder="name@example.com" required>
+				</div>
+				<div class="form-group">
+					<label for="motdepasse">Mot de passe : </label>
+					<input type="password" name="motdepasse" class="form-control" id="motdepasse" placeholder="●●●●●●" required>
+				</div>
+				<div class="form-group">
+					<label for="motdepasse2">Confirmer le mot de passe : </label>
+					<input type="password" name="motdepasse2" class="form-control" id="motdepasse2" placeholder="●●●●●●" required>
+				</div>
+				<div>
+					<label for="age">Date de naissance : </label>
+					<input type="date" name="age" id="age" required>
+				</div>
+				<div class="form-group">
+					<label for="tel">Votre numéro de téléphone : </label>
+					<input type="tel" name="tel" class="form-control" id="tel">
+				</div>
+				<br/>
+				<a href="index.php?action=connexion">Vous êtes déjà client ? Connectez-vous !</a>
+				<br/>
+				<br/>
+				<br/>
+				<button type="submit" class="btn btn-primary" name="ok">Inscription</button>
+			</form>
+</body>
+</html>
