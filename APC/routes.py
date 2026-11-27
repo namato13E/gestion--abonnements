@@ -1,14 +1,13 @@
 from APC import app
 from flask import request, render_template, redirect, url_for, session, abort, flash
 
-
 @app.route("/")
 def index():
     return render_template("index.html", user=session.get("user"))
 
 @app.route("/animation")
 def animation():
-    return render_template("index.html", user=session.get("user"))
+    return render_template("animation.html", user=session.get("user"))
 
 
 @app.route("/login", methods=['GET', 'POST'])

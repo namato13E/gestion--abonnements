@@ -3,9 +3,6 @@ from flask import render_template, session
 
 @app.errorhandler(403)
 def forbidden(error):
-    print("----------------")
-    print(session.get('role'))
-    print("----------------")
     return render_template("403.html", title="403 Forbidden"), 403
 
 @app.errorhandler(404)

@@ -7,4 +7,4 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
-from APC import routes
+from APC import routes, error_handler

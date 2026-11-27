@@ -20,7 +20,11 @@
                 </a>
             </div>
             <ul class="nav-links">
+                {% if user.role == 'admin'%}
+                    <li><a href="{{ url_for('admin') }}" class="btn-admin" >Admin</a></li>
+                {% endif%}
                 <li><a href="{{ url_for('index') }}">Accueil</a></li>
+                
                 <li><a href="{{ url_for('animation') }}">Animation</a></li>
                 
                 
@@ -29,12 +33,15 @@
                 {% else %}
                     <li><a href="{{ url_for('login') }}" class="btn-login">Connexion</a></li>
                 {% endif %}
+
+                
             </ul>
         </nav>
     </header>
 
     <main class="container">
         {% block content %}
+            
         {% endblock %}
     </main>
 

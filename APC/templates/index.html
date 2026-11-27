@@ -1,1 +1,6 @@
 {%extends "base.html"%}
+{% block content %}
+    {% if user %}
+        <p>Bonjour {{ user.firstname | title }} {{ user.lastname | upper }}</p>
+    {% endif %}        
+{% endblock %}
